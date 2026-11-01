@@ -2,26 +2,30 @@
 layout: runbook
 title: '#4471, split · three problems under one ticket'
 owner: Nathan2128
-status: split
+status: open
 reviewed: 2026-11-01
-signature: Nathan2128
+signature: 'v1.eyJzdWIiOiIxMjE5IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTM1NDU1NTksImV4cCI6MTc5MzYzMTk1OX0.Mh6YrZQM37zHu8zv6mlc0OfhQjl-CtXfPX222rO4PVM'
 ---
 
 <script>
   import SplitTable from '#lib/kb/SplitTable.svelte';
   import SplitCount from '#lib/kb/SplitCount.svelte';
   import Callout from '#lib/kb/Callout.svelte';
+  import ProblemStatus from '#lib/kb/ProblemStatus.svelte';
   import RenderStamp from '#lib/kb/RenderStamp.svelte';
 </script>
 
 The [#4471 page](/kb/incidents/4471) says the reports merged into #4471 are one bug with one fix.
-They are not. Read report by report, the ticket holds three different problems. Each one has its
-own symptom, its own cause and its own fix, and the parser fix that is queued only reaches one of them.
+They are not. Read report by report, the ticket holds three different problems, each with its
+own symptom, cause and fix. #4471 was closed on 5 October, and engineering answered for two
+of the three: `parser` is fixed, `hint` won't be fixed because the booking-v3 form is retired.
+Nobody answered for `one-day`. It is still open, and it has no owner.
 
 <Callout kind="warn">
-The queued parser fix reaches <SplitCount ticket={4471} problem="parser" /> reports.
-<SplitCount ticket={4471} except="parser" /> reports stay broken after it ships: they are two
-other bugs, and nobody is working on them.
+Closing #4471 settled <SplitCount ticket={4471} status="fixed" /> reports (fixed) and
+<SplitCount ticket={4471} status="won't fix" /> (won't fix). <SplitCount ticket={4471} status="open" />
+reports are still open: dates that move by one day. Neither change touched them, and nobody
+is working on them.
 </Callout>
 
 ## What #4471 holds
@@ -30,8 +34,9 @@ other bugs, and nobody is working on them.
 
 Every report is counted once: the ticket system exports in overlapping pages, so some reports
 appear twice in the export. The table is built from the export when the page renders, so it
-stays right as the desk merges more reports in. A problem's ticket says *not filed yet* until
-it has an issue of its own.
+stays right as the desk merges more reports in. Ticket and status come from the problem's own
+issue; a problem without one says *not filed yet*, and a problem nobody has fixed or ruled out
+is *open*.
 
 ## `parser` · the shared parser reads the month first
 
@@ -41,6 +46,10 @@ goes out as 4 July. It happens on every channel: the app, email and the form.
 **Why.** The shared parser reads every date month first. Our tenants in day-first locales
 (Germany, the Netherlands, Poland, the UK and others) write the day first, so their dates
 come out flipped.
+
+**Where it stands.** <ProblemStatus problem="parser" why />. Reports of a swapped date
+from a day-first tenant that arrive after 5 October mean the fix didn't reach them: open a
+new issue rather than reopening #4471.
 
 **The rule.** The tenant's locale writes the day before the month, and the report did not
 come in through a booking-v3 form. This is `causeOf` in `causes.ts`, unchanged.
@@ -57,6 +66,9 @@ and type the month first. The form then reads the date the tenant's way, day fir
 parser is not involved: fix the parser and these bookings still come out wrong. The fix is
 the hint (or the form reading what its hint asks for).
 
+**Where it stands.** <ProblemStatus problem="hint" why />. The form is gone, so no new
+reports of this kind should arrive. One that does means a tenant is still on booking-v3.
+
 **The rule.** A day-first tenant on booking-v3, and the report came in through the form.
 This is the `hint` branch of `causeOf`.
 
@@ -71,11 +83,14 @@ Monday).
 
 **Why.** This is a time zone or day boundary problem: a time is turned into a date in the
 wrong zone and falls on the other side of midnight. It has nothing to do with the order of
-day and month, so neither the parser fix nor the hint fix touches it.
+day and month, so neither the parser fix nor retiring booking-v3 touches it.
+
+**Where it stands.** <ProblemStatus problem="one-day" />. This is the only problem from #4471
+that is still broken, and nobody owns it.
 
 **The rule.** Tenant and channel can't show this one. The desk finds it by reading what the
 reporter wrote, and lists those reports in `desk-notes.json` (`oneDayMove`). A report on
-that list is `one-day`, before any other rule. Today the #4471 page files these under
+that list is `one-day`, before any other rule. The #4471 page files these under
 `parser` with a footnote; they belong apart.
 
 <SplitTable ticket={4471} problem="one-day" />
@@ -89,12 +104,15 @@ the reporter felt, not what broke. Merging on it put all three problems in one p
 the biggest one gave the ticket its name. [Decision 0002](/kb/decisions/0002-dedupe-by-cause)
 proposes merging by cause instead; 0001 stays as it was written.
 
-## What to do with #4471
+## What to do now
 
-- Keep #4471 for `parser`. The queued fix is right for it.
-- Track `hint` and `one-day` each in their own issue (linked in the table above when filed),
-  and stop merging new reports of either into #4471.
-- When the parser fix ships, close only `parser`. Reports that keep coming in after that are
-  most likely one of the other two.
+- `one-day` needs an owner. Its issue is open and unassigned; until someone takes it, the
+  desk keeps adding reports of it there, not to #4471.
+- Don't reopen #4471. It is closed and its two answers stand. New reports go to the issue for
+  their problem, sorted by the rules above.
+- A swapped date after 5 October is a `parser` regression or a tenant still on booking-v3,
+  not "more of #4471". Check the tenant's form before you file it.
+- Read the reports for one-day moves as they come in, and add them to `oneDayMove` in
+  `desk-notes.json`. Tenant and channel will never find them for you.
 
 <RenderStamp {signature} />

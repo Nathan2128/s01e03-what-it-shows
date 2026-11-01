@@ -4,7 +4,7 @@ title: '0002 · Duplicates share a cause, not a subject line'
 owner: Nathan2128
 status: proposed
 reviewed: 2026-11-01
-signature: Nathan2128
+signature: 'v1.eyJzdWIiOiIxMjE5IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTM1NDU1NTksImV4cCI6MTc5MzYzMTk1OX0.Mh6YrZQM37zHu8zv6mlc0OfhQjl-CtXfPX222rO4PVM'
 ---
 
 <script>
@@ -18,8 +18,8 @@ signature: Nathan2128
 [0001](/kb/decisions/0001-dedupe-by-subject) merges reports whose subject lines match. Under
 it, #4471 collected reports of [three different problems](/kb/incidents/4471-split): the
 parser, the booking-v3 date hint, and dates that move by one day. The subjects did not follow
-the problem: the same subject turns up under all three. One ticket, one fix queued, and two
-of the problems had no owner.
+the problem: the same subject turns up under all three. One ticket, one fix queued; when #4471 closed,
+one of the three, the one-day move, was still open with no owner.
 
 ## Decision
 

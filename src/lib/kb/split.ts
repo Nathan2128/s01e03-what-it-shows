@@ -56,10 +56,22 @@ export function splitByProblem(
     }));
 }
 
-// Where each problem is tracked: tickets-4471.json. No number yet means not filed yet.
-export type Tickets = { repo: string; issues: Partial<Record<Problem, number | null>> };
+// Where each problem is tracked, and where it stands: tickets-4471.json. No issue number yet means
+// not filed yet; no status means open.
+export type TicketStatus = 'open' | 'fixed' | "won't fix";
+export type ProblemTicket = { issue: number | null; status?: TicketStatus; why?: string };
+export type Tickets = { repo: string; ticketClosed?: string; issues: Partial<Record<Problem, ProblemTicket | null>> };
+
+export function ticketOf(tickets: Tickets, p: ProblemGroup['problem']): ProblemTicket | null {
+  return p === 'unplaced' ? null : (tickets.issues[p] ?? null);
+}
 
 export function ticketHref(tickets: Tickets, p: ProblemGroup['problem']): string | null {
-  const n = p === 'unplaced' ? null : tickets.issues[p];
+  const n = ticketOf(tickets, p)?.issue;
   return n ? `https://github.com/${tickets.repo}/issues/${n}` : null;
+}
+
+// A problem nobody has fixed or ruled out is open, filed or not.
+export function statusOf(tickets: Tickets, p: ProblemGroup['problem']): TicketStatus {
+  return ticketOf(tickets, p)?.status ?? 'open';
 }

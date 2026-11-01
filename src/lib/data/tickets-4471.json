@@ -1,8 +1,9 @@
 {
   "repo": "Nathan2128/s01e03-what-it-shows",
+  "ticketClosed": "2026-10-05",
   "issues": {
-    "parser": 1,
-    "hint": 2,
-    "one-day": 3
+    "parser": { "issue": 1, "status": "fixed", "why": "fix(dates): parse dd/mm for eu locales" },
+    "hint": { "issue": 2, "status": "won't fix", "why": "booking-v3 form retired" },
+    "one-day": { "issue": 3, "status": "open" }
   }
 }

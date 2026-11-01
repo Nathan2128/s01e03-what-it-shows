@@ -5,6 +5,7 @@
   import type { Report } from '#lib/kb/causes';
   import { tenantOf } from '#lib/kb/locales';
   import ProblemTicket from '#lib/kb/ProblemTicket.svelte';
+  import ProblemStatus from '#lib/kb/ProblemStatus.svelte';
 
   // The whole ticket by default; with `problem`, one problem in detail.
   let { ticket, problem, examples = 3 }: { ticket: number; problem?: string; examples?: number } = $props();
@@ -28,6 +29,7 @@
       <dt>came in by</dt><dd>{channels(one.channels)}</dd>
       <dt>seen</dt><dd>{one.firstSeen} → {one.lastSeen}</dd>
       <dt>ticket</dt><dd><ProblemTicket problem={one.problem} /></dd>
+      <dt>status</dt><dd><ProblemStatus problem={one.problem} why /></dd>
     </dl>
     {#if examples > 0}
       <table class="examples">
@@ -51,7 +53,7 @@
 
   <table>
     <thead>
-      <tr><th>problem</th><th>reports</th><th>tenants</th><th>came in by</th><th>seen</th><th>ticket</th></tr>
+      <tr><th>problem</th><th>reports</th><th>tenants</th><th>came in by</th><th>seen</th><th>ticket</th><th>status</th></tr>
     </thead>
     <tbody>
       {#each groups as g (g.problem)}
@@ -62,6 +64,7 @@
           <td class="ch">{channels(g.channels)}</td>
           <td>{g.reports.length ? `${g.firstSeen} → ${g.lastSeen}` : '—'}</td>
           <td><ProblemTicket problem={g.problem} /></td>
+          <td><ProblemStatus problem={g.problem} /></td>
         </tr>
       {/each}
     </tbody>

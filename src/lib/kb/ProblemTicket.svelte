@@ -1,12 +1,12 @@
 <script lang="ts">
   import tickets from '#lib/data/tickets-4471.json';
-  import { ticketHref, type Problem, type Tickets } from '#lib/kb/split';
+  import { ticketHref, ticketOf, type Problem, type Tickets } from '#lib/kb/split';
 
   let { problem }: { problem: Problem | 'unplaced' } = $props();
 
   const t = tickets as Tickets;
   const href = $derived(ticketHref(t, problem));
-  const n = $derived(problem === 'unplaced' ? null : t.issues[problem]);
+  const n = $derived(ticketOf(t, problem)?.issue);
 </script>
 
 {#if href}
