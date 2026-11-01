@@ -34,3 +34,19 @@ Support desk. Decision records: whoever signed them.
 ---
 
 Exported 2026-10-04 from the `support` repo, `apps/kb/` → `src/`.
+
+---
+
+## This repo: S01E03 "what it shows"
+
+The kb export above, plus the split of support ticket #4471.
+
+- **Tickets:** #4471 holds three problems, each filed as an issue here, each with how many reports it covers:
+  [#1 parser](https://github.com/Nathan2128/s01e03-what-it-shows/issues/1),
+  [#2 booking-v3 hint](https://github.com/Nathan2128/s01e03-what-it-shows/issues/2),
+  [#3 one-day move](https://github.com/Nathan2128/s01e03-what-it-shows/issues/3).
+- **Page:** `src/routes/kb/incidents/4471-split/+page.svx`, with its counts computed in
+  `src/lib/kb/split.ts` and `src/lib/kb/SplitTable.svelte`. The page as the desk sees it:
+  `rendered/kb/incidents/4471-split.html`.
+- **Proposed decision:** `src/routes/kb/decisions/0002-dedupe-by-cause/` (0001 is left as written).
+- **Build:** Node 22+, then `npm install && npm run build` (prerenders the kb to `build/`).

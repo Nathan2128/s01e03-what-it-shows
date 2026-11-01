@@ -1,0 +1,100 @@
+---
+layout: runbook
+title: '#4471, split · three problems under one ticket'
+owner: Nathan2128
+status: split
+reviewed: 2026-11-01
+signature: Nathan2128
+---
+
+<script>
+  import SplitTable from '#lib/kb/SplitTable.svelte';
+  import SplitCount from '#lib/kb/SplitCount.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+</script>
+
+The [#4471 page](/kb/incidents/4471) says the reports merged into #4471 are one bug with one fix.
+They are not. Read report by report, the ticket holds three different problems. Each one has its
+own symptom, its own cause and its own fix, and the parser fix that is queued only reaches one of them.
+
+<Callout kind="warn">
+The queued parser fix reaches <SplitCount ticket={4471} problem="parser" /> reports.
+<SplitCount ticket={4471} except="parser" /> reports stay broken after it ships: they are two
+other bugs, and nobody is working on them.
+</Callout>
+
+## What #4471 holds
+
+<SplitTable ticket={4471} />
+
+Every report is counted once: the ticket system exports in overlapping pages, so some reports
+appear twice in the export. The table is built from the export when the page renders, so it
+stays right as the desk merges more reports in. A problem's ticket says *not filed yet* until
+it has an issue of its own.
+
+## `parser` · the shared parser reads the month first
+
+**What people see.** A booking lands on the wrong date, with day and month swapped: 7 April
+goes out as 4 July. It happens on every channel: the app, email and the form.
+
+**Why.** The shared parser reads every date month first. Our tenants in day-first locales
+(Germany, the Netherlands, Poland, the UK and others) write the day first, so their dates
+come out flipped.
+
+**The rule.** The tenant's locale writes the day before the month, and the report did not
+come in through a booking-v3 form. This is `causeOf` in `causes.ts`, unchanged.
+
+<SplitTable ticket={4471} problem="parser" />
+
+## `hint` · the booking-v3 form tells people to type the month first
+
+**What people see.** The same swap, day and month, but only in bookings made through the
+booking form, and only for tenants on booking-v3.
+
+**Why.** booking-v3 prints `MM/DD/YYYY` under its date field. People do what the hint says
+and type the month first. The form then reads the date the tenant's way, day first. The
+parser is not involved: fix the parser and these bookings still come out wrong. The fix is
+the hint (or the form reading what its hint asks for).
+
+**The rule.** A day-first tenant on booking-v3, and the report came in through the form.
+This is the `hint` branch of `causeOf`.
+
+<SplitTable ticket={4471} problem="hint" />
+
+## `one-day` · the date moves by one day, not a swap
+
+**What people see.** The date is off by exactly one day: Tuesday shows as Monday. Day and
+month are where they should be. Two people invited to the same meeting from different time
+zones can get different days (`R-41344`: a client in Lisbon got Tuesday, one in Toronto got
+Monday).
+
+**Why.** This is a time zone or day boundary problem: a time is turned into a date in the
+wrong zone and falls on the other side of midnight. It has nothing to do with the order of
+day and month, so neither the parser fix nor the hint fix touches it.
+
+**The rule.** Tenant and channel can't show this one. The desk finds it by reading what the
+reporter wrote, and lists those reports in `desk-notes.json` (`oneDayMove`). A report on
+that list is `one-day`, before any other rule. Today the #4471 page files these under
+`parser` with a footnote; they belong apart.
+
+<SplitTable ticket={4471} problem="one-day" />
+
+## Why one ticket hid three problems
+
+The desk merges by subject line ([decision 0001](/kb/decisions/0001-dedupe-by-subject)). The
+subjects here are things like "Date is wrong", "Wrong day on the invite" and "Month and day
+swapped?", and each of those turns up under all three problems. A subject says how
+the reporter felt, not what broke. Merging on it put all three problems in one place, and
+the biggest one gave the ticket its name. [Decision 0002](/kb/decisions/0002-dedupe-by-cause)
+proposes merging by cause instead; 0001 stays as it was written.
+
+## What to do with #4471
+
+- Keep #4471 for `parser`. The queued fix is right for it.
+- Track `hint` and `one-day` each in their own issue (linked in the table above when filed),
+  and stop merging new reports of either into #4471.
+- When the parser fix ships, close only `parser`. Reports that keep coming in after that are
+  most likely one of the other two.
+
+<RenderStamp {signature} />

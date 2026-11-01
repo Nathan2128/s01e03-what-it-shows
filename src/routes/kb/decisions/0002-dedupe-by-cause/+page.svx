@@ -1,0 +1,38 @@
+---
+layout: runbook
+title: '0002 · Duplicates share a cause, not a subject line'
+owner: Nathan2128
+status: proposed
+reviewed: 2026-11-01
+signature: Nathan2128
+---
+
+<script>
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+</script>
+
+**Date:** 1 November 2026 · **Proposed by:** Nathan2128 · **Replaces:** [0001](/kb/decisions/0001-dedupe-by-subject), once accepted
+
+## Context
+
+[0001](/kb/decisions/0001-dedupe-by-subject) merges reports whose subject lines match. Under
+it, #4471 collected reports of [three different problems](/kb/incidents/4471-split): the
+parser, the booking-v3 date hint, and dates that move by one day. The subjects did not follow
+the problem: the same subject turns up under all three. One ticket, one fix queued, and two
+of the problems had no owner.
+
+## Decision
+
+Two reports are the same issue when they have the same cause. The cause comes from the
+report's tenant (locale and booking form) and channel, as `causes.ts` runs it, plus what the
+desk reads in the body for problems the tenant can't show (`desk-notes.json`). The subject
+line is not used.
+
+## Consequences
+
+- Triage reads a little more: tenant and channel are on every report; the body only when
+  the date moved by one day.
+- A cause that has no ticket yet gets one, instead of joining the biggest ticket nearby.
+- The [triage page](/kb/triage/dedupe) still describes 0001 and needs rewriting if this is accepted.
+
+<RenderStamp {signature} />
